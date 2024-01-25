@@ -40,49 +40,37 @@ public:
         // convert string to int
         for (int i = 0; i < 3; i++) {
             dmy_int[i] = std::stoi(dmy_str[i]);
+            if (dmy_int[i] <= 0) dmy_int[i] = 1;
         }
 
-        // month boundary
-        if (dmy_int[1] > 12) {
-            dmy_int[2] += std::floor(dmy_int[1] / 12);
-            int rest = dmy_int[1] % 12;
-
-            if (rest == 0) dmy_int[1] = 12;
-            else dmy_int[1] = rest;
+        int unevenCtr = 0,
+            unevenDays[] = {1, -2, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1},
+            lastYears = dmy_int[2] - 1,
+            leapsCount = std::floor(lastYears / 4),
+            daysYears = leapsCount + 365 * lastYears,   /** product */
+            lastMonths = dmy_int[1] - 1,
+            lastMonthsYears = std::floor(lastMonths / 12),
+            daysMonths = lastMonths * 30;   /** product */
+        
+        for (int i = 0; i < lastMonths; i++) {
+            daysMonths += unevenDays[unevenCtr];
+            unevenCtr++;
+            if (unevenCtr >= 12) unevenCtr = 0;
         }
 
-        // day boundary
-        if (dmy_int[0] > model[dmy_int[1]]) {
-            dmy_int[0];
-        }
+        lastYears += lastMonthsYears;
+        leapsCount =- std::floor(lastYears / 4);
+        daysMonths += leapsCount;
 
-        // year
-        if (dmy_int[2] % 4 == 0) {
-            model[1] = 29;
-        }
+        totalDays = daysYears + daysMonths + dmy_int[0];
     }
 
-    int day, month, year;
-
-    int model[] = {
-        31, 28, 31, 30, 31, 30, 31,
-        31, 30, 31, 30, 31
-    };
+    int totalDays = 0;
 };
 
 void printDaySpread(Date A, Date B) {
 
-    if (A.year < B.year) {
-        Date buff = A;
-        A = B;
-        B = buff;
-    }
-
-    int dayAccumulation = A.month A.day;
-
-    for (int i = 0; i < 12; i++) {
-        
-    }
+    std::cout << "Difference: " << A.totalDays - B.totalDays << std::endl;
 }
 
 int main(int argc, char* argv[]) {
@@ -94,6 +82,8 @@ int main(int argc, char* argv[]) {
 
     Date A = Date(std::string(argv[1]));
     Date B = Date(std::string(argv[2]));
+
+    printDaySpread(A, B);
 
     return 0;
 }
