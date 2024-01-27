@@ -190,8 +190,21 @@ void printDaySpread(Date A, Date B, int count) {
             std::cout << datesSpread[i] << std::endl;
         }
     }
+    // no difference
     else {
-        
+        for (int i = 0; i < count; i++) {
+            datesSpread[i] = (
+                std::to_string(A.day) + "/" +
+                std::to_string(A.month) + "/" +
+                std::to_string(A.year)
+            );
+        }
+
+        std::cout << "RESULT: \n" << std::endl;
+
+        for (int i = 0; i < count; i++) {
+            std::cout << datesSpread[i] << std::endl;
+        }
     }
 }
 
