@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstdio>
 #include <cmath>
 
 bool isChANum(char ch) {
@@ -18,8 +19,68 @@ bool isChANum(char ch) {
     return false;
 }
 
+class Model {
+public:
+    static void normalizeDay(int &day, int &month, int &year);
+    static int getMonth(int month, int year);
+    static int getMonths(int month, int year);
+    static int getYear(int year);
+
+private:
+    static const int days[12];
+};
+
+void Model::normalizeDay(int &day, int &month, int &year) {
+    while (day > getMonth(month, year)) {
+        day -= getMonth(month, year);
+        month++;
+
+        if (month >= 13) {
+            month = 1;
+            year++;
+        }
+    }
+
+    while (day <= 0) {
+        month--;
+
+        if (month <= 0) {
+            month = 12;
+            year--;
+        }
+
+        day += getMonth(month, year);
+    }
+}
+
+int Model::getMonth(int month, int year) {
+    if (year % 4 == 0 && month == 2) {
+        return 29;
+    }
+    else return days[month - 1];
+}
+
+int Model::getMonths(int month, int year) {
+    int acc = 0;
+    for (int i = 1; i < month; i++) {
+        acc += getMonth(i, year);
+    }
+    return acc;
+}
+
+int Model::getYear(int year) {
+    return year * 365 + std::floor((year - 1) / 4);
+}
+
+const int Model::days[12] = {
+    31, 28, 31, 30, 31, 30, 31,
+    31, 30, 31, 30, 31
+};
+
 class Date {
 public:
+    Date() {}
+
     Date(std::string dateStr) {
 
         int dateDex = 0;
@@ -40,50 +101,137 @@ public:
         // convert string to int
         for (int i = 0; i < 3; i++) {
             dmy_int[i] = std::stoi(dmy_str[i]);
-            if (dmy_int[i] <= 0) dmy_int[i] = 1;
         }
 
-        int unevenCtr = 0,
-            unevenDays[] = {1, -2, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1},
-            lastYears = dmy_int[2] - 1,
-            leapsCount = std::floor(lastYears / 4),
-            daysYears = leapsCount + 365 * lastYears,   /** product */
-            lastMonths = dmy_int[1] - 1,
-            lastMonthsYears = std::floor(lastMonths / 12),
-            daysMonths = lastMonths * 30;   /** product */
-        
-        for (int i = 0; i < lastMonths; i++) {
-            daysMonths += unevenDays[unevenCtr];
-            unevenCtr++;
-            if (unevenCtr >= 12) unevenCtr = 0;
+        /** Normalize Date */
+
+        day = std::abs(dmy_int[0]);
+        month = std::abs(dmy_int[1]);
+        year = std::abs(dmy_int[2]);
+
+        if (month > 12) {
+            year += std::floor(month / 12);
         }
 
-        lastYears += lastMonthsYears;
-        leapsCount =- std::floor(lastYears / 4);
-        daysMonths += leapsCount;
+        if (month != 0) {
+            month %= 12;
+            if (month == 0) month = 12;
+        }
 
-        totalDays = daysYears + daysMonths + dmy_int[0];
+        Model::normalizeDay(day, month, year);
     }
 
-    int totalDays = 0;
+    int day = 0, month = 0, year = 0;
 };
 
-void printDaySpread(Date A, Date B) {
+void printDaySpread(Date A, Date B, int count) {
 
-    std::cout << "Difference: " << A.totalDays - B.totalDays << std::endl;
+    if (count <= 0) {
+        std::cerr << "Error. Count cannot be 0 or negative." << std::endl;
+        return;
+    }
+
+    if (A.year < B.year ||
+        (A.year == B.year && A.month < B.month) ||
+        (A.year == B.year && A.month == B.month && A.day < B.day)
+    ) {
+        Date buff = A;
+        A = B;
+        B = buff;
+    }
+
+    int aDay = A.day,
+        aMonth = Model::getMonths(A.month, A.year),
+        aYear = Model::getYear(A.year),
+        aTotal = aDay + aMonth + aYear,
+        bDay = B.day,
+        bMonth = Model::getMonths(B.month, B.year),
+        bYear = Model::getYear(B.year),
+        bTotal = bDay + bMonth + bYear,
+        differ = aTotal - bTotal;
+
+    std::string datesSpread[count];
+
+    if (differ > 0) {
+        float changeRate = float(differ + 1) / float(count),
+              dayf = B.day - changeRate;
+
+        int day = dayf,
+            month = B.month,
+            year = B.year;
+        
+        for (int i = 0; i < count; i++) {
+
+            dayf += changeRate;
+            day = dayf;
+
+            Model::normalizeDay(day, month, year);
+
+            if (year > A.year ||
+                (month > A.month && year == A.year) ||
+                (day > A.day && month == A.month && year == A.year) ||
+                (i == count - 1 && (day != A.day || month != A.month || year != A.year))
+            ) {
+                day = A.day;
+                month = A.month;
+                year = A.year;
+            }
+
+            datesSpread[i] = (
+                std::to_string(day) + "/" +
+                std::to_string(month) + "/" +
+                std::to_string(year)
+            );
+        }
+
+        std::cout << "RESULT: \n" << std::endl;
+
+        for (int i = 0; i < count; i++) {
+            std::cout << datesSpread[i] << std::endl;
+        }
+    }
+    else {
+        
+    }
 }
 
 int main(int argc, char* argv[]) {
 
-    if (argc < 3) {
+    if (argc != 7) {
         std::cerr << "Input Error";
         return 0;
     }
 
-    Date A = Date(std::string(argv[1]));
-    Date B = Date(std::string(argv[2]));
+    Date dates[2];
+    int count = 0, expectedParamsCount = 3;
+    std::string dateStrArr[] = {"--from", "--to"};
 
-    printDaySpread(A, B);
+    for (int i = 0; i < argc; i++) {
+        for (int j = 0; j < 2; j++) {
+            if (argv[i] == dateStrArr[j] && i+1 < argc) {
+                dates[j] = Date(std::string(argv[i+1]));
+                expectedParamsCount--;
+            }
+        }
+
+        if (std::string(argv[i]) == "--count" && i+1 < argc) {
+            std::string numBuff = "";
+
+            for (auto &ch : std::string(argv[i+1])) {
+                if (isChANum(ch)) numBuff += ch;
+            }
+
+            if (numBuff == "") count = 0;
+            else count = std::stoi(numBuff);
+
+            expectedParamsCount--;
+        }
+    }
+
+    if (expectedParamsCount == 0) {
+        printDaySpread(dates[0], dates[1], count);
+    }
+    else std::cerr << "Input Error";
 
     return 0;
 }
