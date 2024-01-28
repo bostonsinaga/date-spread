@@ -171,7 +171,7 @@ void printDaySpread(
             fileWrite.open(fileOutName);
 
             for (int i = 0; i < count; i++) {
-                fileWrite << datesSpread[i] << std::endl;
+                fileWrite << datesSpread[i] << (i < count - 1 ? "\n" : "");
             }
 
             fileWrite.close();
@@ -229,7 +229,7 @@ void printDaySpread(
 
 int main(int argc, char* argv[]) {
 
-    if (argc != 7) {
+    if (argc != 7 && argc != 9) {
         std::cerr << "\nInput Error\n";
         return 0;
     }
