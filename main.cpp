@@ -1,5 +1,5 @@
 #include <iostream>
-#include <cstdio>
+#include <fstream>
 #include <cmath>
 
 bool isChANum(char ch) {
@@ -124,10 +124,14 @@ public:
     int day = 0, month = 0, year = 0;
 };
 
-void printDaySpread(Date A, Date B, int count) {
-
+void printDaySpread(
+    Date A,
+    Date B,
+    int count,
+    std::string fileOutName
+) {
     if (count <= 0) {
-        std::cerr << "Error. Count cannot be 0 or negative." << std::endl;
+        std::cerr << "\nError. Count cannot be 0 or negative.\n";
         return;
     }
 
@@ -151,6 +155,29 @@ void printDaySpread(Date A, Date B, int count) {
         differ = aTotal - bTotal;
 
     std::string datesSpread[count];
+
+    auto printOut = [&]() {
+        // display to screen
+        if (fileOutName == "") {
+            std::cout << "\nRESULT: \n" << std::endl;
+
+            for (int i = 0; i < count; i++) {
+                std::cout << datesSpread[i] << std::endl;
+            }
+        }
+        // save to file
+        else {
+            std::ofstream fileWrite;
+            fileWrite.open(fileOutName);
+
+            for (int i = 0; i < count; i++) {
+                fileWrite << datesSpread[i] << std::endl;
+            }
+
+            fileWrite.close();
+            std::cout << "\nFile written to " << fileOutName << std::endl;
+        }
+    };
 
     if (differ > 0) {
         float changeRate = float(differ + 1) / float(count),
@@ -184,11 +211,7 @@ void printDaySpread(Date A, Date B, int count) {
             );
         }
 
-        std::cout << "RESULT: \n" << std::endl;
-
-        for (int i = 0; i < count; i++) {
-            std::cout << datesSpread[i] << std::endl;
-        }
+        printOut();
     }
     // no difference
     else {
@@ -200,51 +223,63 @@ void printDaySpread(Date A, Date B, int count) {
             );
         }
 
-        std::cout << "RESULT: \n" << std::endl;
-
-        for (int i = 0; i < count; i++) {
-            std::cout << datesSpread[i] << std::endl;
-        }
+        printOut();
     }
 }
 
 int main(int argc, char* argv[]) {
 
     if (argc != 7) {
-        std::cerr << "Input Error";
+        std::cerr << "\nInput Error\n";
         return 0;
     }
 
     Date dates[2];
-    int count = 0, expectedParamsCount = 3;
+    int count = 0,
+        expectedDateParamsCount = 2,
+        expectedOtherParamsCount = 1;
+
     std::string dateStrArr[] = {"--from", "--to"};
+    std::string fileOutName = "";
 
     for (int i = 0; i < argc; i++) {
-        for (int j = 0; j < 2; j++) {
-            if (argv[i] == dateStrArr[j] && i+1 < argc) {
-                dates[j] = Date(std::string(argv[i+1]));
-                expectedParamsCount--;
+
+        std::string curArgv = std::string(argv[i]);
+        std::string nextArgv;
+
+        if (i+1 < argc) {
+            nextArgv = std::string(argv[i+1]);
+        }
+        else break;
+
+        if (expectedDateParamsCount > 0) {
+            for (int j = 0; j < 2; j++) {
+                if (curArgv == dateStrArr[j]) {
+                    dates[j] = Date(nextArgv);
+                    expectedDateParamsCount--;
+                }
             }
         }
 
-        if (std::string(argv[i]) == "--count" && i+1 < argc) {
+        if (curArgv == "--count") {
             std::string numBuff = "";
 
-            for (auto &ch : std::string(argv[i+1])) {
+            for (auto &ch : nextArgv) {
                 if (isChANum(ch)) numBuff += ch;
             }
 
             if (numBuff == "") count = 0;
             else count = std::stoi(numBuff);
 
-            expectedParamsCount--;
+            expectedOtherParamsCount--;
         }
+        else if (curArgv == "--out") fileOutName = argv[i+1];
     }
 
-    if (expectedParamsCount == 0) {
-        printDaySpread(dates[0], dates[1], count);
+    if (expectedDateParamsCount == 0 && expectedOtherParamsCount == 0) {
+        printDaySpread(dates[0], dates[1], count, fileOutName);
     }
-    else std::cerr << "Input Error";
+    else std::cerr << "\nInput Error\n";
 
     return 0;
 }
