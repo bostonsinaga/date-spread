@@ -231,10 +231,16 @@ void printDaySpread(
     }
 }
 
+void printError() {
+    std::cerr << "\nInput Error!\n";
+    std::cout << "\nPlease Enter:" << std::endl <<
+        "--from [dd/mm/yyyy] --to [dd/mm/yyyy] --count [INT] --out [FILE_NAME<opt>]\n";
+}
+
 int main(int argc, char* argv[]) {
 
     if (argc != 7 && argc != 9) {
-        std::cerr << "\nInput Error\n";
+        printError();
         return 0;
     }
 
@@ -283,7 +289,7 @@ int main(int argc, char* argv[]) {
     if (expectedDateParamsCount == 0 && expectedOtherParamsCount == 0) {
         printDaySpread(dates[0], dates[1], count, fileOutName);
     }
-    else std::cerr << "\nInput Error\n";
+    else printError();
 
     return 0;
 }
