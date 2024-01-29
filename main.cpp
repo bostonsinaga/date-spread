@@ -130,8 +130,8 @@ void printDaySpread(
     int count,
     std::string fileOutName
 ) {
-    if (count <= 0) {
-        std::cerr << "\nError. Count cannot be 0 or negative.\n";
+    if (count <= 1) {
+        std::cerr << "\nError. Count cannot be less than 2.\n";
         return;
     }
 
@@ -181,7 +181,8 @@ void printDaySpread(
 
     if (differ > 0) {
         float changeRate = float(differ + 1) / float(count),
-              dayf = B.day - changeRate;
+              dayf = B.day - changeRate,
+              dayf_fraction;
 
         int day = dayf,
             month = B.month,
@@ -191,8 +192,11 @@ void printDaySpread(
 
             dayf += changeRate;
             day = dayf;
+            dayf_fraction = dayf - float(day);
 
             Model::normalizeDay(day, month, year);
+            dayf = day + dayf_fraction;
+            dayf_fraction = 0;
 
             if (year > A.year ||
                 (month > A.month && year == A.year) ||
