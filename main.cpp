@@ -124,6 +124,26 @@ public:
     int day = 0, month = 0, year = 0;
 };
 
+std::string createDateString(int &day_in, int &month_in, int &year_in) {
+    std::string dayStr, monthStr;
+
+    if (day_in < 10) {
+        dayStr = "0" + std::to_string(day_in);
+    }
+    else dayStr = std::to_string(day_in);
+
+    if (month_in < 10) {
+        monthStr = "0" + std::to_string(month_in);
+    }
+    else monthStr = std::to_string(month_in);
+
+    return (
+        dayStr + "/" +
+        monthStr + "/" +
+        std::to_string(year_in)
+    );
+};
+
 void printDaySpread(
     Date A,
     Date B,
@@ -240,11 +260,7 @@ void printDaySpread(
                 year = A.year;
             }
 
-            datesSpread[i] = (
-                std::to_string(day) + "/" +
-                std::to_string(month) + "/" +
-                std::to_string(year)
-            );
+            datesSpread[i] = createDateString(day, month, year);
         }
 
         printOut();
@@ -252,11 +268,7 @@ void printDaySpread(
     // no difference
     else {
         for (int i = 0; i < count; i++) {
-            datesSpread[i] = (
-                std::to_string(A.day) + "/" +
-                std::to_string(A.month) + "/" +
-                std::to_string(A.year)
-            );
+            datesSpread[i] = createDateString(A.day, A.month, A.year);
         }
 
         printOut();
