@@ -157,25 +157,57 @@ void printDaySpread(
     std::string datesSpread[count];
 
     auto printOut = [&]() {
-        // display to screen
-        if (fileOutName == "") {
+
+        auto displayOnScreen = [&]() {
             std::cout << "\nRESULT: \n" << std::endl;
 
             for (int i = 0; i < count; i++) {
                 std::cout << datesSpread[i] << std::endl;
             }
-        }
-        // save to file
-        else {
-            std::ofstream fileWrite;
-            fileWrite.open(fileOutName);
+        };
 
-            for (int i = 0; i < count; i++) {
-                fileWrite << datesSpread[i] << (i < count - 1 ? "\n" : "");
+        if (fileOutName == "") {
+            displayOnScreen();
+        }
+        else {
+            /** Check Existing File */
+
+            std::ifstream fileRead(fileOutName);
+            bool keepWriting = true;
+
+            if (fileRead.good()) {
+                std::cout << "\nWarning! The file already exists. Do you want to overwrite it?\n(Y/N) ";
+
+                std::string isIt;
+                std::cin >> isIt;
+
+                if (isIt != "Y" && isIt != "y") {
+                    std::cout << "\nDo you still want to display the result on the screen?\n(Y/N) ";
+
+                    std::string stillDisplayResult;
+                    std::cin >> stillDisplayResult;
+
+                    if (stillDisplayResult == "Y" || stillDisplayResult == "y") {
+                        displayOnScreen();
+                    }
+                    else std::cout << "\nResult is discarded.\n";
+
+                    keepWriting = false;
+                }
             }
 
-            fileWrite.close();
-            std::cout << "\nFile written to " << fileOutName << std::endl;
+            if (keepWriting) {
+
+                std::ofstream fileWrite;
+                fileWrite.open(fileOutName);
+
+                for (int i = 0; i < count; i++) {
+                    fileWrite << datesSpread[i] << (i < count - 1 ? "\n" : "");
+                }
+
+                fileWrite.close();
+                std::cout << "\nFile written to '" << fileOutName << "'.\n";
+            }
         }
     };
 
