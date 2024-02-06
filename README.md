@@ -6,7 +6,7 @@ Create string data of days spread between 2 dates.
 Firstly add this directory to Environment Variable.<br/>
 Then type: <br/>
 ```
-date-spread --from "01/01/2024" --to "31/12/2024" --count "100" --out "file.txt"
+date-spread --from 01/01/2024 --to 31/12/2024 --count 10 --out file_name.txt
 ```
 >Expected output:
 >
