@@ -1,1 +1,0 @@
-g++ main.cpp -o debug/date-spread & cd debug
